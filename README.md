@@ -40,17 +40,17 @@ import cv2
 import django
 ```
 
-## Using Method
+## Usage
 
-- Config the dependencies in need
+- Dependencies
 
-You should make sure having installed python3, django, opencv and numpy.
+Ennsure installation of python3, django, opencv and numpy.
 
-- Download this repo
+- Download/clone this repo
 
-One way, download this repo directly, the other, use the command : ```django-admin startproject CDT``` to build a django project and copy all folers and files into it.
+Download this repo directly or use the command : ```django-admin startproject CDT``` to build a django project and copy all folders and files into it.
 
-! Note : Don't forget to copy the backend part [https://github.com/SPiCaRiA/Clock-Drawing-Test](https://github.com/SPiCaRiA/Clock-Drawing-Test) to the judge folder.
+! Note : CDT backend should be placed in judge folder. It is up to the enduser to create a proper pipeline that accepts staged clock drawings at clock face, hands, and digits level.
 
 - Enter the follow command in cmd
 
@@ -58,19 +58,21 @@ One way, download this repo directly, the other, use the command : ```django-adm
 
 - Start project in browser
 
-Enter ```127.0.0.1:8000/index/``` in the address bar of the browser, and the index page will be shown. It is the introduction on this product.
+Enter ```127.0.0.1:8000/index/``` in the address bar of your browser, and the index page will be shown.
 
 ![The Rending of Index Page](imgs/index.jpg)
 
-- Use the testing system
+- Usage of CDT testing
 
-Click the try part you will turn to the sketch page, which is a drawing board, just follow the command to draw will get the final result.
+Clicking the Demo link will lead you to the sketch page, which is a drawing board. Follow instructions to get a result.
 
 ![The Rending of Drawing Board](imgs/sketch.png)
 
 ## <span id="design">Design Idea</span>
 
-The whole part adopt MVC design pattern. This repo just implements view and controler. First let's have a look at the structure of the catalog.
+I adopt the MVC design pattern for this test. This repo just implements the view and controller as well as custom backend.
+
+Structure of catalog is as follows:
 
 ```
 - CDT
@@ -114,21 +116,20 @@ The whole part adopt MVC design pattern. This repo just implements view and cont
 - manage.py
 ```
 
-The CDT folder is the framework of this project. [\_\_init__.py](CDT/__init__.py) makes others recognise this as a package. [settings.py](CDT/settings.py) defines the basic path of template pages, static files including images, css, js and so on. [urls.py](CDT/urls.py) defines all pages in this project, each page corresponds to a function in view. [view.py](CDT/view.py) defines three pages, index is the index page, sketch is the drawing board and save is the controller. [wsgi.png](CDT/wsgi.png) manage the web server which help you run this application.
+The CDT folder is the framework of this project. [\_\_init__.py](CDT/__init__.py) and makes other scripts recognize this as a package. [settings.py](CDT/settings.py) defines the basic path of template pages, static files including images, css, js and so on. [urls.py](CDT/urls.py) defines all pages in this project, each page corresponds to a function in view. [view.py](CDT/view.py) defines three pages, index is the index page, sketch is the drawing board and save is the controller. [wsgi.png](CDT/wsgi.png) manages the web server which helps you run this application.
 
-The initial data folder is empty, because this folder stores the paintings you draw on the sketch.
+The initial data folder is empty.
 
-The judge folder stores the grading program. You should copy the whole repo from [https://github.com/SPiCaRiA/Clock-Drawing-Test](https://github.com/SPiCaRiA/Clock-Drawing-Test). Don't forget!
+The judge folder stores the grading program.
 
 The static folder is unique for django. Generally, the images, css files, js files be called by templates in django are stalled in this folder, and the path of static files are specified in settings.
 
-The template folder stores the static web pages which are written in hyper text markup language. And the basic address is defined in settings. Note: All pages are static files included in django project should be imported through absolute path, so, this is why we should define basic address in settings.
-
+The template folder stores the static web pages which are written in HTML. And the basic address is defined in settings. Note: All pages are static files included in django project should be imported through absolute path.
 [manage.py](manage.py) manages the status of the whole project.
 
 Now, let's have a look at some design details.
 
-This product uses plenty of canvas to do rendering. I packet some functions to draw line and circle which are widely used in the view.
+This product uses canvas to do rendering. I have packeted some functions to draw circles and lines to eliminate repetitive code usage.
 
 ```
 function Draw_Line(pen, start_x, start_y, end_x, end_y) {
@@ -151,7 +152,7 @@ function Fill_Circle(pen, center_x, center_y, radius, start_angle, end_angle) {
 }
 ```
 
-And I use this way to set the style of the pen.
+Pen is set as follows.
 
 ```
 var content_pen = document.getElementById("content_canvas").getContext("2d");
@@ -160,16 +161,16 @@ content_pen.lineWidth = 6;
 content_pen.strokeStyle = '#2d85f0';
 ```
 
-For the drawing board, it requires a equal width and height with the browser. So, I deal it with such scripts.
+Drawing board is set to match browser dimensions.
 
 ```
 canvas.width = document.documentElement.clientWidth;
 canvas.height = document.documentElement.clientHeight;
 ```
 
-But this will appear horizontal and vertical scroll bars, and I set the style of the body ```scroll-x:hidden; scroll-y:hidden;``` Thus, the size adaptive will not affect the typesetting of the sketch page.
+I eliminate scroll bars and lock the page for a cleaner and simpler UI.
 
-Besides, what the tester draws should be stored in the server temperorily, but these images are firstly shown as canvas. I turn canvas to base64 encoded image format string, and send it to the server.
+The canvas is converted to base64 encoded image format string, and sent to the server.
 
 The front end is as follows.
 
@@ -189,7 +190,7 @@ file.write(img_data)
 file.close()
 ```
 
-In this way, the canvas from the user end can be stored in the server end. But the first time, I use 'GET' method to send request, and I get nothing at the server end. Perhaps the size of a base64 image is so large. So, I change the ajax request to 'POST' method like this.
+In this way, the canvas from the user end can be stored in the server end. For larger images, `POST` is employed instead.
 
 ```
 $.ajax({
@@ -210,9 +211,9 @@ $.ajax({
 });
 ```
 
-Surely, it is right for the script itself. But in a django project, it runs wrongly. I searched some materials, in the sending data, I should add an extra assignment ```csrfmiddlewaretoken: $("[name='csrfmiddlewaretoken']").val()``` and in the template, at where we submit the form, add something like this : ```{% csrf_token %}```. For more detail, please refer to the developer doc [https://docs.djangoproject.com/zh-hans/2.1/](https://docs.djangoproject.com/zh-hans/2.1/).
+We employ CSRF parameter for proper function of the request. ```csrfmiddlewaretoken: $("[name='csrfmiddlewaretoken']").val()``` and in the template add something like this : ```{% csrf_token %}```. For more detail, refer to the developer doc [https://docs.djangoproject.com/zh-hans/2.1/](https://docs.djangoproject.com/zh-hans/2.1/).
 
-At last, in view.py, call the judge part, I use a subprocess to carry out the outer program which stored in [judge/](judge/).
+A subprocess is used to execute the outer program which stored in [judge/](judge/).
 
 ```
 import render
@@ -227,42 +228,4 @@ point = execmd.wait()
 return HttpResponse(point)
 ```
 
-And finally return the point.
-
-## Future Extension
-
-There are two directions.
-
-First, now we recommand the tester to use tablet touch screen to draw on the canvas, because it will be more convenient to draw with pen or hand than a mouse. So the input device is limited. You can try to change it that the tester can submit only the final clock through scanning or taking pictures, and than do splitting and grading. Surely, in this way, the backend code should be modified at the same time.
-
-The other, now in fact, the backend grading code just implement two points, You can try to implement another two. And the 'hour' and 'minute' in the fourth grading point has been sent to view model.
-
-```
-hour = int(request.POST.get('time_hour'))
-minute = int(request.POST.get('time_minute'))
-```
-
-And how to extend the other two grading method, please refer to [https://github.com/SPiCaRiA/Clock-Drawing-Test](https://github.com/SPiCaRiA/Clock-Drawing-Test).
-
-## Summary
-
-This project mainly uses django + ajax framework. This part I record something useful when coding with this framework.
-
-- Use template to represent static page and define its absolute basic address in settings.
-
-- Use static folder to store static files imported by the template such as images, css and js, and define the absolute basic path of static file in settings.
-
-Example:
-
-```
-{% load static %}
-<link rel='icon' type='image/x-icon' href="{% static 'img/index.png' %}" />
-<link rel="stylesheet" type="text/css" href="{% static 'css/index.css' %}" />
-<script type="text/javascript" src="{% static 'js/index.js' %}"></script>
-```
-
-- When sending a large size request, use 'POST' method.
-
-- When send 'POST' request, dont't forget adding ```{% csrf_token %}``` in template and ```csrfmiddlewaretoken: $("[name='csrfmiddlewaretoken']").val(),``` in the sending data.
-
-- All path of web pages should be define in urls.py and each page corresponds to a function in view.py.
+This returns the score.
