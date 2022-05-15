@@ -1,7 +1,10 @@
 import os
+import json
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SECRET_KEY = '(rlax46s6nuckg5v-f=m5w536&c@ep%2+akg2w(%7b8yn-vr!9'
+with open('env.json') as env:
+    data = json.load(env)
+    SECRET_KEY = data['SECRET_KEY']
 DEBUG = True
 
 ALLOWED_HOSTS = []
@@ -81,3 +84,6 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
+
+if __name__ == "__main__":
+    print(SECRET_KEY)
