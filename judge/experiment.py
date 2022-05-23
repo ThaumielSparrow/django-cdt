@@ -12,7 +12,7 @@ from image_generator import ImageGenerator
 
 class Experiment(metaclass=MetaSingleton):
     """
-    The experiment class, representing a CDT tests.
+    The experiment class, representing a CDT test.
     """
     def __init__(self):
         self.img_generator = ImageGenerator()

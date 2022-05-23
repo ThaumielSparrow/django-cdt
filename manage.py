@@ -1,6 +1,8 @@
 import os
 import sys
 
+solution_is_alpha = True
+
 def main():
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'CDT.settings')
     try:
@@ -15,4 +17,7 @@ def main():
 
 
 if __name__ == '__main__':
+    if solution_is_alpha: 
+        pass
+
     main()
